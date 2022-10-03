@@ -1,0 +1,17 @@
+micronaut:
+  application:
+    name: 3dPrintMonitor
+  session:
+    http:
+      cookie: true
+      header: true
+  router:
+    static-resources:
+      default:
+        paths: classpath:public
+        mapping: /**/*
+        enabled: true
+netty:
+  default:
+    allocator:
+      max-order: 3

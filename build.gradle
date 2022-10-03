@@ -1,0 +1,70 @@
+plugins {
+    id("groovy") 
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.micronaut.application") version "3.5.1"
+    id("com.google.cloud.tools.jib") version "2.8.0"
+}
+
+version = "0.1"
+group = "printmonitor"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+
+    implementation("org.hashids:hashids:1.0.3")
+}
+
+application {
+    mainClass.set("printmonitor.Application")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("--enable-preview")
+}
+tasks.withType(Test).configureEach {
+    jvmArgs "--enable-preview"
+}
+tasks.withType(JavaExec).configureEach {
+    jvmArgs "--enable-preview"
+}
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("spock2")
+    processing {
+        incremental(true)
+        annotations("printmonitor.*")
+    }
+}
+
+tasks {
+    jib {
+        from {
+            image = "gcr.io/distroless/java17-debian11"
+        }
+        to {
+            image = "gcr.io/smartphone-broadcast/mn-broadcast"
+        }
+    }
+}
+
+dockerBuild {
+    images = ["gcr.io/smartphone-broadcast/mn-broadcast:latest"]
+}
+
+
