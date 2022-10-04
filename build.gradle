@@ -20,6 +20,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
 
+    implementation("io.micronaut.gcp:micronaut-gcp-logging:4.6.0")
     implementation("org.hashids:hashids:1.0.3")
 }
 

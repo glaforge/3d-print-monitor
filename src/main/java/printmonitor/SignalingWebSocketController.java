@@ -28,22 +28,22 @@ public class SignalingWebSocketController {
 
     @OnOpen
     public Publisher<Message> onOpen(WebSocketSession session) {
-        System.out.println("on open (" + session.getId() + ")");
+        LOG.info("on open (" + session.getId() + ")");
         allSessions.put(session.getId(), session);
         return broadcaster.broadcast(new Message("broadcaster"));
     }
 
     @OnMessage
     public Publisher<Message> onMessage(Message msg, WebSocketSession session) {
-        System.out.println("on message (" + session.getId() + ") : " + msg);
+        LOG.info("on message (" + session.getId() + ") : " + msg);
         switch (msg.type()) {
             case "broadcaster" -> {
-                System.out.println(" -> broadcaster");
+                LOG.info(" -> broadcaster");
                 this.broadcasterSession = session;
                 return broadcaster.broadcast(new Message("broadcaster", session.getId()));
             }
             case "watcher" -> {
-                System.out.println(" -> watcher");
+                LOG.info(" -> watcher");
                 if (broadcasterSession != null) {
                     return broadcasterSession.send(new Message("watcher", session.getId()));
                 } else {
@@ -51,19 +51,19 @@ public class SignalingWebSocketController {
                 }
             }
             case "offer" -> {
-                System.out.println(" -> offer");
+                LOG.info(" -> offer");
                 return allSessions.get(msg.id()).send(new Message("offer", session.getId(), msg.description()));
             }
             case "answer" -> {
-                System.out.println(" -> answer > desc: " + msg.description());
+                LOG.info(" -> answer > desc: " + msg.description());
                 return allSessions.get(msg.id()).send(new Message("answer", session.getId(), msg.description()));
             }
             case "candidate" -> {
-                System.out.println(" -> candidate > desc: " + msg.description());
+                LOG.info(" -> candidate > desc: " + msg.description());
                 return allSessions.get(msg.id()).send(new Message("candidate", session.getId(), msg.description()));
             }
             default -> {
-                System.out.println(" -> unknown message " + msg);
+                LOG.info(" -> unknown message " + msg);
                 return Publishers.empty();
             }
         }
@@ -71,10 +71,10 @@ public class SignalingWebSocketController {
 
     @OnClose
     public void onClose(WebSocketSession session) {
-        System.out.println("on close (" + session.getId() + ")");
+        LOG.info("on close (" + session.getId() + ")");
         allSessions.remove(session);
         if (session.equals(broadcasterSession)) {
-            System.out.println(" -> broadcaster session closed");
+            LOG.info(" -> broadcaster session closed");
             this.broadcasterSession = null;
         }
     }
